@@ -367,7 +367,13 @@
     }
 
     function eventTimes(event) {
-        return Array.isArray(event.time) ? event.time : [event.time];
+        const source = event.time ?? event.times ?? [];
+        return Array.isArray(source) ? source : [source];
+    }
+
+    function eventJsonDays(event) {
+        // Prefer the original events.json day numbering when compatibility data provides it.
+        return Array.isArray(event.jsonDays) ? event.jsonDays : event.days;
     }
 
     // events.json convention: Monday=0 ... Sunday=6.
@@ -417,7 +423,7 @@
         for (let dayOffset = -1; dayOffset < MAX_DAYS_LOOKAHEAD; dayOffset++) {
             const checkServerDate = new Date(currentServerDate.getTime() + dayOffset * MS_PER_DAY);
             const jsonDay = jsonDayFromJsUtcDay(checkServerDate.getUTCDay());
-            if (!event.days.includes(jsonDay)) continue;
+            if (!eventJsonDays(event).includes(jsonDay)) continue;
 
             for (const timeStr of eventTimes(event)) {
                 const startMs = occurrenceUtcMs(checkServerDate, timeStr);
